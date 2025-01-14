@@ -3,8 +3,33 @@ const express = require("express");
 const app = express();
 
 /** @description Initialize sqlite db */
+
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./tmp/employee.db');
+
+const path = require('path');
+
+const fs = require('fs');
+const localTmpPath = path.join(__dirname, 'tmp');
+
+console.log(localTmpPath);
+
+if (!fs.existsSync(localTmpPath)) {
+    fs.mkdirSync(localTmpPath);
+}
+
+const dbPath = process.env.NODE_ENV === 'production' 
+    ? path.join('/tmp', 'employee.db') 
+    : path.join(__dirname, 'tmp', 'employee.db');
+
+console.log(dbPath);
+
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error('Error opening database:', err.message);
+    } else {
+        console.log('Connected to SQLite database at:', dbPath);
+    }
+});
 
 /** @description Initialize http server */
 const http = require('http');
